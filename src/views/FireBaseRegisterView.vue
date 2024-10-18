@@ -4,29 +4,52 @@ import { useRouter } from 'vue-router'
 import {getAuth, createUserWithEmailAndPassword} from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import db from '../Firebase/init';
+import { app } from '../Firebase/init.js';
 
 const router = useRouter()
 const Email = ref('');
 const password = ref('');
-const auth = getAuth();
+const auth = getAuth(app);
 
-const createAccount = async() => {
+// 獨立的函數，用來將用戶信息寫入 Firestore
+const addUserToFirestore = async (userUid, userEmail, role) => {
+  try {
+    await setDoc(doc(db, 'users', userUid), {
+      email: userEmail,
+      role: role,
+    });
+    console.log(`User ${userUid} added to Firestore successfully.`);
+  } catch (error) {
+    console.error('Error writing user to Firestore:', error);
+    throw error; // 確保將錯誤傳遞回主流程
+  }
+};
+
+const createAccount = () => {
   const userEmail = Email.value;
   const userPassword = password.value;
   const role = userEmail.toLowerCase().includes('admin') ? 'admin' : 'user';
-    try {
-        const { user } = await createUserWithEmailAndPassword(auth, userEmail, userPassword)
-        await setDoc(doc(db, 'users', user.uid), {
-            email: userEmail,
-            role: role, 
-        })
-        alert('Account created successfully')
-        router.push({ name: 'About' })
-    } catch (error) {
-        alert(error.message)
-    }
-}
-  
+
+  createUserWithEmailAndPassword(auth, userEmail, userPassword)
+    .then(async (userCredential) => {
+      const user = userCredential.user;
+
+      console.log('User created:', user.uid);
+
+      // 調用獨立的 Firestore 寫入函數
+      await addUserToFirestore(user.uid, userEmail, role);
+    })
+    .then(() => {
+      alert('Account created successfully');
+      router.push({ name: 'About' });
+    })
+    .catch((error) => {
+      console.error('Error creating account or writing to Firestore:', error);
+      alert(error.message);
+    });
+};
+
+ 
 </script>
     <template>
   <!-- 🗄️ W3. Library Registration Form -->

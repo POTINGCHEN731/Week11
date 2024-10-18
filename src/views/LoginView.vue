@@ -4,6 +4,7 @@ import { isAuthenticated } from '../router/index.js';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 import db from '../Firebase/init'
+import { app } from '../Firebase/init.js'
 import { useRouter } from 'vue-router'
 
 const formData = ref({
@@ -11,31 +12,41 @@ const formData = ref({
   password: '',})
   const router = useRouter()
   
-  const submitForm = async () => {
+  const submitForm = () => {
     const userEmail = formData.value.username
     const userPassword = formData.value.password
 
-    try {
-        const { user } = await signInWithEmailAndPassword(getAuth(), userEmail, userPassword)
-
-        const userRef = doc(db, 'users', user.uid)
-        const userSnap = await getDoc(userRef)
-
-        if (userSnap.exists()) {
-            const userData = userSnap.data()
-            isAuthenticated.value = {
-                user: user,
-                role: userData.role, 
+    signInWithEmailAndPassword(getAuth(app), userEmail, userPassword)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            const userRef = doc(db, 'users', user.uid);
+            
+            return getDoc(userRef);
+        })
+        .then((userSnap) => {
+            if (userSnap.exists()) {
+                const userData = userSnap.data();
+                isAuthenticated.value = {
+                    user: userSnap.id,
+                    role: userData.role
+                };
+                console.log(`Logged in as ${userData.role}`);
+                router.push({ name: 'About' });
+            } else {
+                console.error('No user document found in Firestore');
+                alert('No user document found in Firestore');
             }
-            console.log(`Logged in as ${userData.role}`)
-            router.push({ name: 'About' })  
-        } else {
-            console.error('No user document found in Firestore')
-        }
-    } catch (error) {
-        alert(error.code)
-    }
+        })
+        .catch((error) => {
+            if (error.code === 'permission-denied') {
+                alert('You do not have permission to access this resource.');
+            } else {
+                alert('Error: ' + error.message);
+            }
+            console.error('Error signing in or fetching user data:', error);
+        });
 }
+
 </Script>
 
 <template>
