@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { isAuthenticated } from '../router/index.js';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
-import db from '../firebase/init'
+import db from '../Firebase/init'
 import { useRouter } from 'vue-router'
 
 const formData = ref({
