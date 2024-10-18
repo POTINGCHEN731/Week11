@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import {getAuth, createUserWithEmailAndPassword} from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
-import db from '../firebase/init';
+import db from '../Firebase/init';
 
 const router = useRouter()
 const Email = ref('');
