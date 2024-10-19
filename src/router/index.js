@@ -9,6 +9,7 @@ import {ref} from 'vue'
 import WeatherView from '@/views/WeatherView.vue'
 import CountBookAPI from '@/views/CountBookAPI.vue'
 import GetAllBookAPI from '@/views/GetAllBookAPI.vue'
+import process from 'node:process'
 
 const isAuthenticated = ref(null)
 const routes = [
