@@ -1,19 +1,16 @@
 import { fileURLToPath, URL } from 'node:url'
+
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
+
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [
-    vue(),
-    vueDevTools(),
-  ],
+export default defineConfig(({ mode }) => ({
+  plugins: [vue(), vueDevTools()],
+  base: mode === 'production' ? '/Week11/' : '/', // 根据环境设置 base 路径
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': new URL('./src', import.meta.url).pathname
     }
-  },
-  publicPath: import.meta.env.BASE_URL === 'production'
-    ? '/Week11/'
-    : '/'
-})
+  }
+}))
