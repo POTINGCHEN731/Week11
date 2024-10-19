@@ -1,5 +1,4 @@
 import { fileURLToPath, URL } from 'node:url'
-import process from 'node:process'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
@@ -14,7 +13,7 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
-  publicPath: process.env.BASE_URL === 'production'
+  publicPath: import.meta.env.BASE_URL === 'production'
     ? '/Week11/'
     : '/'
 })
